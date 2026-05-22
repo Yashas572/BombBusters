@@ -7,6 +7,7 @@ import { EquipmentPanel } from '../game/EquipmentPanel';
 import { ActionPanel } from '../game/ActionPanel';
 import { CoachSidebar } from '../coach/CoachSidebar';
 import { RedWireFlash } from '../game/RedWireFlash';
+import { TutorialOverlay } from '../game/TutorialOverlay';
 
 export function GameScreen() {
   const gameState = useGameStore(s => s.gameState);
@@ -30,6 +31,7 @@ export function GameScreen() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-bomb-bg to-slate-950 text-slate-100">
       <RedWireFlash />
+      <TutorialOverlay />
 
       {/* Top bar */}
       <header className="border-b border-slate-800 bg-slate-950/60 backdrop-blur sticky top-0 z-10">
@@ -57,36 +59,44 @@ export function GameScreen() {
       <div className="px-6 py-6">
         <div className="grid grid-cols-12 gap-6 max-w-[1800px] mx-auto">
           {/* Left rail: equipment + actions */}
-          <aside className="col-span-12 lg:col-span-3 space-y-4">
+          <aside className="col-span-12 lg:col-span-3 space-y-4" data-tutorial-zone="action-panel">
             <EquipmentPanel equipment={gameState.equipment} />
             <ActionPanel />
           </aside>
 
           {/* Center: board */}
           <main className="col-span-12 lg:col-span-6 space-y-4">
-            <Rack
-              rack={gameState.aiRack}
-              hidden
-              label="AI Opponent's Rack"
-              selectedTargetId={selectedTargetId}
-              highlightedTileIds={highlightedTileIds}
-              onTileClick={id => selectTarget(selectedTargetId === id ? null : id)}
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DetonationTracker state={gameState} />
-              <CutHistory state={gameState} />
+            <div data-tutorial-zone="ai-rack">
+              <Rack
+                rack={gameState.aiRack}
+                hidden
+                label="AI Opponent's Rack"
+                selectedTargetId={selectedTargetId}
+                highlightedTileIds={highlightedTileIds}
+                onTileClick={id => selectTarget(selectedTargetId === id ? null : id)}
+              />
             </div>
-            <Rack
-              rack={gameState.playerRack}
-              hidden={false}
-              label="Your Rack"
-              selectedTargetId={null}
-              highlightedTileIds={highlightedTileIds}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div data-tutorial-zone="tracker">
+                <DetonationTracker state={gameState} />
+              </div>
+              <div data-tutorial-zone="wire-status">
+                <CutHistory state={gameState} />
+              </div>
+            </div>
+            <div data-tutorial-zone="player-rack">
+              <Rack
+                rack={gameState.playerRack}
+                hidden={false}
+                label="Your Rack"
+                selectedTargetId={null}
+                highlightedTileIds={highlightedTileIds}
+              />
+            </div>
           </main>
 
           {/* Right rail: coach */}
-          <aside className="col-span-12 lg:col-span-3">
+          <aside className="col-span-12 lg:col-span-3" data-tutorial-zone="coach">
             <CoachSidebar />
           </aside>
         </div>

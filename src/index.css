@@ -8,3 +8,34 @@ html, body, #root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #e2e8f0;
 }
+
+/* Tutorial spotlight: additive glow on highlighted zones (no dimming of the rest) */
+[data-tutorial-zone] {
+  transition: box-shadow 250ms ease, transform 250ms ease;
+  border-radius: 16px;
+}
+
+[data-tutorial-zone].tutorial-spotlight {
+  box-shadow:
+    0 0 0 3px rgba(16, 185, 129, 0.7),
+    0 0 24px rgba(16, 185, 129, 0.35),
+    0 0 60px rgba(16, 185, 129, 0.2);
+  position: relative;
+  z-index: 30;
+  animation: tutorial-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes tutorial-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px rgba(16, 185, 129, 0.55),
+      0 0 24px rgba(16, 185, 129, 0.3),
+      0 0 60px rgba(16, 185, 129, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(16, 185, 129, 0.85),
+      0 0 32px rgba(16, 185, 129, 0.5),
+      0 0 80px rgba(16, 185, 129, 0.3);
+  }
+}

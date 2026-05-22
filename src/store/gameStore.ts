@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createInitialState } from '../engine/deck';
 import { applyAction, startGame } from '../engine/gameState';
 import { planAiTurn } from '../engine/ai/aiOpponent';
+import { createTutorialState } from '../engine/tutorial';
 import type { GameAction, GameEvent, GameState, MissionConfig, Difficulty } from '../engine/types';
 
 type Screen = 'menu' | 'missionSelect' | 'game' | 'gameOver' | 'settings';
@@ -14,9 +15,14 @@ interface GameStore {
   aiThinking: boolean;
   selectedTargetId: string | null;
   selectedDeclaredValue: number | null;
+  tutorialMode: boolean;
+  tutorialStep: number;
 
   setScreen: (s: Screen) => void;
   startMission: (mission: MissionConfig, difficulty: Difficulty) => void;
+  startTutorial: () => void;
+  advanceTutorialStep: () => void;
+  exitTutorial: () => void;
   placeStartingInfoToken: (tileId: string) => void;
   selectTarget: (tileId: string | null) => void;
   selectDeclaredValue: (value: number | null) => void;
@@ -33,12 +39,19 @@ function dispatch(state: GameStore, action: GameAction): Partial<GameStore> | nu
   if (!state.gameState) return null;
   try {
     const result = applyAction(state.gameState, action);
+    let nextState = result.state;
+
+    // Tutorial mode: keep the turn on the player so the AI doesn't take over the lesson.
+    if (state.tutorialMode && nextState.phase === 'playing' && nextState.currentTurn === 'ai') {
+      nextState = { ...nextState, currentTurn: 'player' };
+    }
+
     return {
-      gameState: result.state,
+      gameState: nextState,
       lastEvents: result.events,
       selectedTargetId: null,
       selectedDeclaredValue: null,
-      screen: result.state.phase === 'gameover' ? 'gameOver' : state.screen,
+      screen: nextState.phase === 'gameover' ? 'gameOver' : state.screen,
     };
   } catch (err) {
     console.warn('Action rejected:', err);
@@ -54,8 +67,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
   aiThinking: false,
   selectedTargetId: null,
   selectedDeclaredValue: null,
+  tutorialMode: false,
+  tutorialStep: 0,
 
   setScreen: s => set({ screen: s }),
+
+  startTutorial: () => {
+    set({
+      gameState: createTutorialState(),
+      screen: 'game',
+      lastEvents: [],
+      selectedTargetId: null,
+      selectedDeclaredValue: null,
+      tutorialMode: true,
+      tutorialStep: 0,
+    });
+  },
+
+  advanceTutorialStep: () => set(s => ({ tutorialStep: s.tutorialStep + 1 })),
+
+  exitTutorial: () => set({ tutorialMode: false, tutorialStep: 0, gameState: null, screen: 'menu' }),
 
   startMission: (mission, difficulty) => {
     const initial = createInitialState(mission, difficulty);
@@ -105,7 +136,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   runAiTurn: async () => {
-    const { gameState } = get();
+    const { gameState, tutorialMode } = get();
+    if (tutorialMode) return;
     if (!gameState || gameState.phase !== 'playing' || gameState.currentTurn !== 'ai') return;
 
     set({ aiThinking: true });
@@ -135,5 +167,5 @@ export const useGameStore = create<GameStore>((set, get) => ({
   highlightTiles: ids => set({ highlightedTileIds: ids }),
   clearHighlights: () => set({ highlightedTileIds: [] }),
 
-  exitToMenu: () => set({ screen: 'menu', gameState: null, lastEvents: [] }),
+  exitToMenu: () => set({ screen: 'menu', gameState: null, lastEvents: [], tutorialMode: false, tutorialStep: 0 }),
 }));

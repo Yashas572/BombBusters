@@ -4,6 +4,7 @@ import type { Difficulty } from '../../engine/types';
 
 export function MainMenu() {
   const setScreen = useGameStore(s => s.setScreen);
+  const startTutorial = useGameStore(s => s.startTutorial);
   const difficulty = useSettings(s => s.difficulty);
   const setDifficulty = useSettings(s => s.setDifficulty);
 
@@ -58,12 +59,21 @@ export function MainMenu() {
               <div className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/10 transition" />
             </button>
 
-            <button
-              onClick={() => setScreen('settings')}
-              className="text-sm text-slate-400 hover:text-bomb-accent transition underline-offset-4 hover:underline"
-            >
-              Settings & API Key
-            </button>
+            <div className="flex gap-4 items-center text-sm">
+              <button
+                onClick={startTutorial}
+                className="text-bomb-coach hover:text-emerald-300 transition underline-offset-4 hover:underline font-semibold"
+              >
+                ▶ Play Tutorial (first time? start here)
+              </button>
+              <span className="text-slate-700">·</span>
+              <button
+                onClick={() => setScreen('settings')}
+                className="text-slate-400 hover:text-bomb-accent transition underline-offset-4 hover:underline"
+              >
+                Settings & API Key
+              </button>
+            </div>
           </div>
         </div>
       </header>

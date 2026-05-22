@@ -1,5 +1,6 @@
 import type { EquipmentCard } from '../../engine/types';
 import { useGameStore } from '../../store/gameStore';
+import { Tooltip } from '../ui/Tooltip';
 
 const EQUIPMENT_LABELS: Record<EquipmentCard['name'], string> = {
   double_detector: 'Double Detector',
@@ -31,13 +32,20 @@ export function EquipmentPanel({ equipment }: { equipment: EquipmentCard[] }) {
       <div className="text-sm uppercase tracking-wide text-slate-400">Equipment</div>
       {equipment.map(card => {
         const disabled = !card.unlocked || card.used;
+        const statusTooltip = card.used
+          ? 'This equipment has been used in this game.'
+          : card.unlocked
+          ? 'Available to activate on your turn.'
+          : `Unlocks when all four copies of ${card.unlockPair} have been cut from both racks.`;
         return (
           <div key={card.name} className={`rounded p-2 ${disabled ? 'bg-slate-800/50' : 'bg-slate-700'}`}>
             <div className="flex items-center justify-between">
               <div className="font-bold">{EQUIPMENT_LABELS[card.name]}</div>
-              <div className="text-xs">
-                {card.used ? 'Used' : card.unlocked ? 'Ready' : `Locked (cut ${card.unlockPair}s)`}
-              </div>
+              <Tooltip position="left" content={<span>{statusTooltip}</span>}>
+                <div className="text-xs cursor-help underline decoration-dotted underline-offset-2">
+                  {card.used ? 'Used' : card.unlocked ? 'Ready' : `Locked (cut ${card.unlockPair}s)`}
+                </div>
+              </Tooltip>
             </div>
             <div className="text-xs text-slate-400">{EQUIPMENT_DESCRIPTIONS[card.name]}</div>
             {!disabled && card.name === 'freeze' && (

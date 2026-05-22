@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { GameState } from '../../engine/types';
 import { useGameStore } from '../../store/gameStore';
 import { clsx } from '../../lib/clsx';
+import { Tooltip } from '../ui/Tooltip';
 
 interface Props {
   state: GameState;
@@ -30,7 +31,16 @@ export function DetonationTracker({ state }: Props) {
       shake && 'animate-shake'
     )}>
       <div className="text-sm uppercase tracking-wide text-slate-400 mb-2 flex justify-between">
-        <span>Detonation Tracker</span>
+        <Tooltip
+          position="bottom"
+          content={
+            <span>
+              Each wrong guess uses one segment. If all are spent, the bomb explodes and both players lose. Drops to red below 2.
+            </span>
+          }
+        >
+          <span className="cursor-help underline decoration-dotted underline-offset-2">Detonation Tracker</span>
+        </Tooltip>
         <span className={clsx('font-bold', danger && 'text-wire-red')}>{current}/{max}</span>
       </div>
       <div className="flex gap-2 items-center">

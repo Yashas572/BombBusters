@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Tile as TileType } from '../../engine/types';
 import { clsx } from '../../lib/clsx';
+import { Tooltip } from '../ui/Tooltip';
 
 interface Props {
   tile: TileType;
@@ -75,7 +76,14 @@ export function Tile({ tile, hidden, position, selected, highlighted, onClick }:
         </>
       )}
       {tile.revealed && hidden && !tile.cut && (
-        <span className="absolute -top-2 -right-2 bg-bomb-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-md">i</span>
+        <span className="absolute -top-2 -right-2">
+          <Tooltip
+            position="top"
+            content={<span>Info token: this tile's value was revealed by an earlier wrong guess. Both players see it.</span>}
+          >
+            <span className="bg-bomb-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-md font-bold cursor-help">i</span>
+          </Tooltip>
+        </span>
       )}
     </button>
   );
